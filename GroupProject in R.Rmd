@@ -1,0 +1,762 @@
+---
+title: "Group Project"
+output: powerpoint_presentation
+date: "2024-04-09"
+---
+
+```{r}
+
+library(dplyr)
+#Import data set
+df <- read.csv("C:/Users/File/Documents/Group6.csv", header=TRUE)
+head(df)
+df1 <- df[df$Country.Code %in% c('GBR','USA','CAN'),]
+head(df1)
+
+#Getting missing counts and missing proportion
+missing_count <- vector()
+missing_percentage <- vector()
+
+for(i in 1:213) {
+  missing_count[i] <- sum(is.na(df1[i,5:68]))
+  missing_percentage[i] <- (missing_count[i]/64)*100
+}
+
+
+#missing_proportion
+df1$missing_percentage <- missing_percentage
+head(df1)
+
+#calculate row means without missing values
+avg <- vector()
+for (i in 1:213) {
+  avg[i] <- rowMeans(df1[i,5:68],na.rm = TRUE)
+}
+
+df1$Mean <- avg
+
+#replace null values with zero
+df1[,5:68][is.na(df1[,5:68])] <- 0
+head(df1)
+#replace zeros with row means
+for(i in 1:213) {
+  for(j in 5:68) {
+    if(df1[i,j] == 0){
+      df1[i,j] <- avg[i]
+    }
+  }
+}
+
+#Filter the rows which missing proportion less than 60% and row means is not equal to 0
+df2 <- data.frame(df1)
+df3 <- df2[df2$missing_percentage <= 60 & df2$Mean!=0,]
+head(df3)
+
+#create data frame without some columns
+df4<-data.frame(df3[,-c(1,2,4,69,70)])
+head(df4)
+
+#Create data frame by transposing
+df5<-setNames(data.frame(t(df4[,-1])),df4[,1])
+head(df5)
+#Get The summary 
+summary(df5)
+```
+
+
+```{r}
+#Create data frames according to the country 
+d_uk<-data.frame(df5[,1:41])    #UK
+head(d_uk)
+d_us<-data.frame(df5[,42:80])   #US
+head(d_us)
+d_c<-data.frame(df5[,81:118])   #Canada
+head(d_c)
+
+```
+
+```{r}
+#Access to electricity variable cannot be interpret because all values are 100 for all countries
+
+#Natural resources depletion(% of GNI)
+d1<-data.frame(d_uk[,2],d_us[,2],d_c[,2])
+Year<-c(1960:2023)
+d1_new<-data.frame(Year,d1)
+head(d1_new)
+
+#Descriptive Analysis
+print(paste("Mean of Natural resources depletion of UK is:", mean(d1_new$d_uk...2.)))  
+print(paste("Median of Natural resources depletion of UK is:", median(d1_new$d_uk...2.))) 
+print(paste("First quantile of Natural resources depletion of UK is:", quantile(d1_new$d_uk...2.,0.25)))
+print(paste("Third quantile of Natural resources depletion of UK is:", quantile(d1_new$d_uk...2.,0.75)))
+
+#We can get descriptive analysis easily using Summary()
+
+#Summary of the data frame
+summary(d1)
+
+#Drawing Line charts
+#For Adjusted savings: natural resources depletion (% of GNI)
+plot(d1_new$Year,d1_new$d_uk...2.,main="Natural resources depletion" ,type = 'o',ylim = c(0,5),xlab = "Years",ylab = "Percentage (% of GNI)",col="red")
+lines(d1_new$Year,d1_new$d_us...2.,type = 'o',ylim = c(0,5),xlab= "Years",ylab = "Percentage (% of GNI)",col="blue")
+lines(d1_new$Year,d1_new$d_c...2.,type = 'o',ylim = c(0,5),xlab= "Years",ylab = "Percentage (% of GNI)",col="green")
+
+
+```
+
+```{r}
+#Agricultural Land (% of land area)
+d2<-data.frame(d_uk[,3],d_us[,3],d_c[,3])
+d2
+d2_new<-data.frame(Year,d2)
+head(d2_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d2)
+
+#For Agricultural land (% of land area)
+plot(d2_new$Year,d2_new$d_uk...3.,main="Agricultural Land",type = 'o',ylim = c(0,100),xlab = "Years",ylab = "Percentage (% of land area)",col="red")
+lines(d2_new$Year,d2_new$d_us...3.,type = 'o',ylim = c(0,100),xlab ="Years",ylab= "Percentage (% of land area)",col="blue")
+lines(d2_new$Year,d2_new$d_c...3.,type = 'o',ylim = c(0,100),xlab ="Years",ylab = "Percentage (% of land area)",col="green")
+```
+
+```{r}
+#Agricultural,forestry and fishing ,value added cannot interpret because only UK has data values.
+
+#Annual fresh water withdrawals,total(%)
+d3<-data.frame(d_uk[,5],d_us[,4],d_c[,4])
+d3_new<-data.frame(Year,d3)
+head(d3_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d3)
+
+#Line chart for Annual fresh water withdrawals,total(%)
+plot(d3_new$Year,d3_new$d_uk...5.,main="Annual fresh water withdrawals,total",type = 'o',ylim = c(0,20),xlab = "Years",ylab= "Percentage",col="red")
+lines(d3_new$Year,d3_new$d_us...4.,type = 'o',ylim = c(0,20),xlab = "Years",ylab= "Percentage",col="blue")
+lines(d3_new$Year,d3_new$d_c...4.,type = 'o',ylim = c(0,20),xlab = "Years",ylab = "Percentage",col="green")
+
+
+```
+
+
+```{r}
+#CO2 emission(metric tons per capita)
+d4<-data.frame(d_uk[,6],d_us[,5],d_c[,5])
+d4_new<-data.frame(Year,d4)
+head(d4_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d4)
+
+#Line chart for CO2 emission
+plot(d4_new$Year,d4_new$d_uk...6.,main="CO2 emission",type = 'o',ylim = c(0,25),xlab = "Years",ylab = "metric tons per capita",col="red")
+lines(d4_new$Year,d4_new$d_us...5.,type = 'o',ylim = c(0,25),xlab ="Years",ylab= "metric tons per capita",col="blue")
+lines(d4_new$Year,d4_new$d_c...5.,type = 'o',ylim = c(0,25),xlab ="Years",ylab = "metric tons per capita",col="green")
+```
+
+
+
+```{r}
+#Cooling degree days
+d5<-data.frame(d_uk[,7],d_us[,6],d_c[,6])
+d5_new<-data.frame(Year,d5)
+head(d5_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d5)
+
+#For Cooling degree days
+plot(d5_new$Year,d5_new$d_uk...7.,main="Cooling degree days",type = 'o',ylim = c(0,1250),xlab = "Years",ylab ="Number of days",col="red")
+lines(d5_new$Year,d5_new$d_us...6.,type = 'o',ylim = c(0,1250),xlab ="Years",ylab= "Number of days",col="blue")
+lines(d5_new$Year,d5_new$d_c...6.,type = 'o',ylim = c(0,1250),xlab ="Years",ylab = "Number of days",col="green")
+
+```
+
+```{r}
+#Electricity production from coal sources(%)
+d6<-data.frame(d_uk[,8],d_us[,7],d_c[,7])
+d6_new<-data.frame(Year,d6)
+head(d6_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d6)
+
+#Line chart for Electricity production from coal sources
+plot(d6_new$Year,d6_new$d_uk...8.,main="Electricity production from coal sources",type = 'o',ylim = c(0,90),xlab = "Years",ylab ="Percentage",col="red")
+lines(d6_new$Year,d6_new$d_us...7.,type = 'o',ylim = c(0,90),xlab ="Years",ylab= "Percentage",col="blue")
+lines(d6_new$Year,d6_new$d_c...7.,type = 'o',ylim = c(0,90),xlab ="Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Energy imports(%)
+d7<-data.frame(d_uk[,9],d_us[,8],d_c[,8])
+d7_new<-data.frame(Year,d7)
+head(d7_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d7)
+
+#Line chart for Energy imports
+plot(d7_new$Year,d7_new$d_uk...9.,main="Energy imports",type = 'o',ylim = c(-80,60),xlab = "Years",ylab ="Percentage",col="red")
+lines(d7_new$Year,d7_new$d_us...8.,type = 'o',ylim = c(-80,60),xlab ="Years",ylab= "Percentage",col="blue")
+lines(d7_new$Year,d7_new$d_c...8.,type = 'o',ylim = c(-80,60),xlab ="Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Energy use(%)
+d8<-data.frame(d_uk[,10],d_us[,9],d_c[,9])
+d8_new<-data.frame(Year,d8)
+head(d8_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d8)
+
+#Line chart for Energy use
+plot(d8_new$Year,d8_new$d_uk...10.,main="Energy use",type = 'o',ylim = c(2700,8500),xlab = "Years",ylab ="Percentage",col="red")
+lines(d8_new$Year,d8_new$d_us...9.,type = 'o',ylim = c(2700,8500),xlab ="Years",ylab= "Percentage",col="blue")
+lines(d8_new$Year,d8_new$d_c...9.,type = 'o',ylim = c(2700,8500),xlab ="Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Fertility rate,total(Birth per woman)
+d9<-data.frame(d_uk[,11],d_us[,10],d_c[,10])
+d9_new<-data.frame(Year,d9)
+head(d9_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d9)
+
+#Line chart for Fertility rate,total
+plot(d9_new$Year,d9_new$d_uk...11.,main="Fertility rate,total",type = 'o',ylim = c(1,4),xlab = "Years",ylab ="Birth per woman",col="red")
+lines(d9_new$Year,d9_new$d_us...10.,type = 'o',ylim = c(1,4),xlab ="Years",ylab= "Birth per woman",col="blue")
+lines(d9_new$Year,d9_new$d_c...10.,type = 'o',ylim = c(1,4),xlab ="Years",ylab = "Birth per woman",col="green")
+
+
+```
+
+```{r}
+#Food production index
+d10<-data.frame(d_uk[,12],d_us[,11],d_c[,11])
+d10_new<-data.frame(Year,d10)
+head(d10_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d10)
+
+#Line chart for Food production index
+plot(d10_new$Year,d10_new$d_uk...12.,main="Food production index",type = 'o',ylim = c(30,120),xlab = "Years",ylab ="Index",col="red")
+lines(d10_new$Year,d10_new$d_us...11.,type = 'o',ylim = c(30,120),xlab ="Years",ylab= "Index",col="blue")
+lines(d10_new$Year,d10_new$d_c...11.,type = 'o',ylim = c(30,120),xlab ="Years",ylab = "Index",col="green")
+
+
+```
+
+```{r}
+#Forest area(%)
+d11<-data.frame(d_uk[,13],d_us[,12],d_c[,12])
+d11_new<-data.frame(Year,d11)
+head(d11_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d11)
+
+#Line chart for Forest area
+plot(d11_new$Year,d11_new$d_uk...13.,main="Forest area",type = 'o',ylim = c(10,40),xlab = "Years",ylab ="Percentage of area",col="red")
+lines(d11_new$Year,d11_new$d_us...12.,type = 'o',ylim = c(10,40),xlab ="Years",ylab= "Percentage of area",col="blue")
+lines(d11_new$Year,d11_new$d_c...12.,type = 'o',ylim = c(10,40),xlab ="Years",ylab = "Percentage of area",col="green")
+
+
+```
+
+```{r}
+#Fossil fuel energy consumption(%)
+d12<-data.frame(d_uk[,14],d_us[,13],d_c[,13])
+d12_new<-data.frame(Year,d12)
+head(d12_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d12)
+
+#Line chart for Fossil fuel energy consumption
+plot(d12_new$Year,d12_new$d_uk...14.,main="Fossil fuel energy consumption",type = 'o',ylim = c(70,100),xlab = "Years",ylab ="Percentage of total",col="red")
+lines(d12_new$Year,d12_new$d_us...13.,type = 'o',ylim = c(70,100),xlab ="Years",ylab= "Percentage of total",col="blue")
+lines(d12_new$Year,d12_new$d_c...13.,type = 'o',ylim = c(70,100),xlab ="Years",ylab = "Percentage of total",col="green")
+
+
+```
+
+```{r}
+#GPD growth(%)
+d13<-data.frame(d_uk[,15],d_us[,14],d_c[,14])
+d13_new<-data.frame(Year,d13)
+head(d13_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d13)
+
+#Line chart for Gini Index
+plot(d13_new$Year,d13_new$d_uk...15.,main="GPD growth",type = 'o',ylim = c(-12,10),xlab = "Years",ylab ="Annual Percentage",col="red")
+lines(d13_new$Year,d13_new$d_us...14.,type = 'o',ylim = c(-12,10),xlab ="Years",ylab= "Annual Percentage",col="blue")
+lines(d13_new$Year,d13_new$d_c...14.,type = 'o',ylim = c(-12,10),xlab ="Years",ylab = "Annual *Percentage",col="green")
+
+
+```
+
+```{r}
+#Gini Index
+d14<-data.frame(d_uk[,16],d_us[,15],d_c[,15])
+d14_new<-data.frame(Year,d14)
+head(d14_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d14)
+
+#Line chart for Gini Index
+plot(d14_new$Year,d14_new$d_uk...16.,main="Gini Index",type = 'o',ylim = c(25,50),xlab = "Years",ylab ="Percentage",col="red")
+lines(d14_new$Year,d14_new$d_us...15.,type = 'o',ylim = c(25,50),xlab ="Years",ylab= "Percentage",col="blue")
+lines(d14_new$Year,d14_new$d_c...15.,type = 'o',ylim = c(25,50),xlab ="Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Government expenditure on education can't interpret because there is no values for Canada.
+
+#Heat index 35 can't interpret because there is no values for Canada.
+
+#Hospital beds
+uk<-as.integer(d_uk[,19])
+us<-as.integer(d_us[,19])
+canada<-as.integer(d_c[,17])
+d15<-data.frame(uk,us,canada)
+d15_new<-data.frame(Year,d15)
+head(d15_new)
+
+#Descriptive analysis
+#Summary of the data frame
+summary(d15)
+
+#line chart for Hospital beds 
+plot(d15_new$Year,d15_new$uk,main="Hospital beds",type = 'o',ylim = c(0,10),xlab = "Years",ylab ="Number of beds",col="red")
+lines(d15_new$Year,d15_new$us,ylim = c(0,10),xlab ="Years",ylab= "Number of beds",col="blue")
+lines(d15_new$Year,d15_new$canada,type = 'o',ylim = c(0,10),xlab ="Years",ylab = "Number of beds",col="green")
+
+```
+
+
+
+```{r}
+#Income share held by lowest 20%
+d16<-data.frame(d_uk[,20],d_us[,20],d_c[,18])
+d16
+d16_new<-data.frame(Year,d16)
+head(d16_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d16)
+
+#Drawing Line charts
+#For Individuals using the internet(% of population)
+plot(d16_new$Year,d16_new$d_uk...20.,main="Individuals using the internet(% of population)" ,type = 'o',ylim = c(5,10),xlab = "Years",ylab = "Percentage",col="red")
+lines(d16_new$Year,d16_new$d_us...20.,type = 'o',ylim = c(5,10),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d16_new$Year,d16_new$d_c...18.,type = 'o',ylim = c(5,10),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Individuals using the internet(% of population)
+d17<-data.frame(d_uk[,21],d_us[,21],d_c[,19])
+d17
+d17_new<-data.frame(Year,d17)
+head(d17_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d17)
+
+#Drawing Line charts
+#For Individuals using the internet(% of population)
+plot(d17_new$Year,d17_new$d_uk...21.,main="Individuals using the internet(% of population)" ,type = 'o',ylim = c(0,97),xlab = "Years",ylab = "Percentage",col="red")
+lines(d17_new$Year,d17_new$d_us...21.,type = 'o',ylim = c(0,97),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d17_new$Year,d17_new$d_c...19.,type = 'o',ylim = c(0,97),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Labor force participation rate,total
+d18<-data.frame(d_uk[,22],d_us[,22],d_c[,20])
+d18
+d18_new<-data.frame(Year,d18)
+head(d18_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d18)
+
+#Drawing Line charts
+#For Level of water stress
+plot(d18_new$Year,d18_new$d_uk...22.,main="Level of water stress" ,type = 'o',ylim = c(70,80),xlab = "Years",ylab = "Percentage",col="red")
+lines(d18_new$Year,d18_new$d_us...22.,type = 'o',ylim = c(70,80),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d18_new$Year,d18_new$d_c...20.,type = 'o',ylim = c(70,80),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Level of water stress
+d19<-data.frame(d_uk[,23],d_us[,23],d_c[,21])
+d19
+d19_new<-data.frame(Year,d19)
+head(d19_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d19)
+
+#Drawing Line charts
+#For Level of water stress
+plot(d19_new$Year,d19_new$d_uk...23.,main="Level of water stress" ,type = 'o',ylim = c(2,34),xlab = "Years",ylab = "Percentage",col="red")
+lines(d19_new$Year,d19_new$d_us...23.,type = 'o',ylim = c(2,34),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d19_new$Year,d19_new$d_c...21.,type = 'o',ylim = c(2,34),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Life expectancy at birth ,total(years)
+d20<-data.frame(d_uk[,24],d_us[,24],d_c[,22])
+d20
+d20_new<-data.frame(Year,d20)
+head(d20_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d20)
+
+#Drawing Line charts
+#For Life expectancy at birth ,total(years)
+plot(d20_new$Year,d20_new$d_uk...24.,main=" Life expectancy at birth ,total(years)" ,type = 'o',ylim = c(65,85),xlab = "Years",ylab = "Percentage",col="red")
+lines(d20_new$Year,d20_new$d_us...24.,type = 'o',ylim = c(65,85),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d20_new$Year,d20_new$d_c...22.,type = 'o',ylim = c(65,85),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Methane emission(metric tons of CO2 equivalent per capita)
+d21<-data.frame(d_uk[,25],d_us[,25],d_c[,23])
+d21
+d21_new<-data.frame(Year,d21)
+head(d21_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d21)
+
+#Drawing Line charts
+#For Methane emission(metric tons of CO2 equivalent per capita)
+plot(d21_new$Year,d21_new$d_uk...25.,main=" Methane emission(metric tons of CO2 equivalent per capita)" ,type = 'o',ylim = c(0,3),xlab = "Years",ylab = "Percentage",col="red")
+lines(d21_new$Year,d21_new$d_us...25.,type = 'o',ylim = c(0,3),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d21_new$Year,d21_new$d_c...23.,type = 'o',ylim = c(0,3),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Mortality rate ,under-5(per 1000 life births)
+d22<-data.frame(d_uk[,26],d_us[,26],d_c[,24])
+d22
+d22_new<-data.frame(Year,d22)
+head(d22_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d22)
+
+#Drawing Line charts
+#For Mortality rate ,under-5(per 1000 life births)
+plot(d22_new$Year,d22_new$d_uk...26.,main=" Mortality rate ,under-5(per 1000 life births)" ,type = 'o',ylim = c(4,33),xlab = "Years",ylab = "Percentage",col="red")
+lines(d22_new$Year,d22_new$d_us...26.,type = 'o',ylim = c(4,33),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d22_new$Year,d22_new$d_c...24.,type = 'o',ylim = c(4,33),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Net migration 
+d23<-data.frame(d_uk[,27],d_us[,27],d_c[,25])
+d23
+d23_new<-data.frame(Year,d23)
+head(d23_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d23)
+
+#Drawing Line charts
+#For Net migration 
+plot(d23_new$Year,d23_new$d_uk...27.,main="Net migration" ,type = 'o',ylim = c(-27100,1900000),xlab = "Years",ylab = "Percentage",col="red")
+lines(d23_new$Year,d23_new$d_us...27.,type = 'o',ylim = c(-27100,1900000),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d23_new$Year,d23_new$d_c...25.,type = 'o',ylim = c(-27100,1900000),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Nitrous Oxide emission(metric tons of CO2 equivalent per capita)
+d24<-data.frame(d_uk[,28],d_us[,28],d_c[,26])
+d24
+d24_new<-data.frame(Year,d24)
+head(d24_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d24)
+
+#Drawing Line charts
+#For Nitrous Oxide emission(metric tons of CO2 equivalent per capita)
+plot(d24_new$Year,d24_new$d_uk...28.,main="Nitrous Oxide emission(metric tons of CO2 equivalent per capita)" ,type = 'o',ylim = c(0,3),xlab = "Years",ylab = "Percentage",col="red")
+lines(d24_new$Year,d24_new$d_us...28.,type = 'o',ylim = c(0,3),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d24_new$Year,d24_new$d_c...26.,type = 'o',ylim = c(0,3),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Patent applications, residents
+d25<-data.frame(d_uk[,29],d_us[,29],d_c[,27])
+d25
+d25_new<-data.frame(Year,d25)
+head(d25_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d25)
+
+#Drawing line plot
+#For Patent applications, residents
+plot(d25_new$Year,d25_new$d_uk...29.,main="Nitrous Oxide emission(metric tons of CO2 equivalent per capita)" ,type = 'o',ylim = c(1500,170000),xlab = "Years",ylab = "Percentage",col="red")
+lines(d25_new$Year,d25_new$d_us...29.,type = 'o',ylim = c(1500,170000),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d25_new$Year,d25_new$d_c...27.,type = 'o',ylim = c(1500,170000),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+
+```{r}
+#Population ages 65 and above(% of total population)
+d26<-data.frame(d_uk[,30],d_us[,30],d_c[,28])
+d26
+d26_new<-data.frame(Year,d26)
+head(d26_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d26)
+
+#Drawing Line charts
+#For Population ages 65 and above (% of total population)
+plot(d26_new$Year,d26_new$d_uk...30.,main="Population ages 65 and above(% of total population)" ,type = 'o',ylim = c(5,20),xlab = "Years",ylab = "Percentage",col="red")
+lines(d26_new$Year,d26_new$d_us...30.,type = 'o',ylim = c(5,20),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d26_new$Year,d26_new$d_c...28.,type = 'o',ylim = c(5,20),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Population density(people per sq. km of land area)
+d27<-data.frame(d_uk[,31],d_us[,31],d_c[,29])
+d27
+d27_new<-data.frame(Year,d27)
+head(d27_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d27)
+
+#Drawing Line charts
+#For Population density(people per sq. km of land area)
+plot(d27_new$Year,d27_new$d_uk...31.,main="Population density(people per sq. km of land area)" ,type = 'o',ylim = c(0,280),xlab = "Years",ylab = "Percentage",col="red")
+lines(d27_new$Year,d27_new$d_us...31.,type = 'o',ylim = c(0,280),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d27_new$Year,d27_new$d_c...29.,type = 'o',ylim = c(0,280),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Prevalence of over weight(% of adults)
+d28<-data.frame(d_uk[,32],d_us[,32],d_c[,30])
+d28
+d28_new<-data.frame(Year,d28)
+head(d28_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d28)
+
+#Drawing Line charts
+#For Prevalence of over weight(% of adults)
+plot(d28_new$Year,d28_new$d_uk...32.,main="Prevalence of over weight(% of adults)" ,type = 'o',ylim = c(40,70),xlab = "Years",ylab = "Percentage",col="red")
+lines(d28_new$Year,d28_new$d_us...32.,type = 'o',ylim = c(40,70),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d28_new$Year,d28_new$d_c...30.,type = 'o',ylim = c(40,70),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Proportion of seats held by woman in national parliaments(%) can't interpret because it only has value for UK
+
+#Ratio of female to male labor force participation rate(%)
+d29<-data.frame(d_uk[,34],d_us[,33],d_c[,31])
+d29
+d29_new<-data.frame(Year,d29)
+head(d29_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d29)
+
+#Drawing Line charts
+#For Ratio of female to male labor force participation rate(%)
+plot(d29_new$Year,d29_new$d_uk...34.,main="Ratio of female to male labor force participation rate(%)" ,type = 'o',ylim = c(70,90),xlab = "Years",ylab = "Percentage",col="red")
+lines(d29_new$Year,d29_new$d_us...33.,type = 'o',ylim = c(70,90),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d29_new$Year,d29_new$d_c...31.,type = 'o',ylim = c(70,90),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Renewable electricity output(% of total electricity)
+d30<-data.frame(d_uk[,35],d_us[,34],d_c[,32])
+d30
+d30_new<-data.frame(Year,d30)
+head(d30_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d30)
+
+#Drawing Line charts
+#For Renewable electricity output(% of total electricity)
+plot(d30_new$Year,d30_new$d_uk...35.,main="Renewable electricity output(% of total electricity)" ,type = 'o',ylim = c(0,65),xlab = "Years",ylab = "Percentage",col="red")
+lines(d30_new$Year,d30_new$d_us...34.,type = 'o',ylim = c(0,65),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d30_new$Year,d30_new$d_c...32.,type = 'o',ylim = c(0,65),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#Renewable energy consumption(% of total final energy consumption)
+d31<-data.frame(d_uk[,36],d_us[,35],d_c[,33])
+d31
+d31_new<-data.frame(Year,d31)
+head(d31_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d31)
+
+#Drawing Line charts
+#For Renewable energy consumption(% of total final energy consumption)
+plot(d31_new$Year,d31_new$d_uk...36.,main="Renewable energy consumption(% of total final energy consumption)" ,type = 'o',ylim = c(0,25),xlab = "Years",ylab = "Percentage",col="red")
+lines(d31_new$Year,d31_new$d_us...35.,type = 'o',ylim = c(0,25),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d31_new$Year,d31_new$d_c...33.,type = 'o',ylim = c(0,25),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Research and development expenditure(% of GPD)
+d32<-data.frame(d_uk[,37],d_us[,36],d_c[,34])
+d32
+d32_new<-data.frame(Year,d32)
+head(d32_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d32)
+
+#Drawing Line charts
+#For Research and development expenditure(% of GPD)
+plot(d32_new$Year,d32_new$d_uk...37.,main="Research and development expenditure(% of GPD)" ,type = 'o',ylim = c(0,5),xlab = "Years",ylab = "Percentage",col="red")
+lines(d32_new$Year,d32_new$d_us...36.,type = 'o',ylim = c(0,5),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d32_new$Year,d32_new$d_c...34.,type = 'o',ylim = c(0,5),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#School enrollment, primary(% gross)
+d33<-data.frame(d_uk[,38],d_us[,37],d_c[,35])
+d33
+d33_new<-data.frame(Year,d33)
+head(d33_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d33)
+
+#Drawing Line charts
+#For School enrollment, primary(% gross)
+plot(d33_new$Year,d33_new$d_uk...38.,main="School enrollment, primary(% gross)" ,type = 'o',ylim = c(90,110),xlab = "Years",ylab = "Percentage",col="red")
+lines(d33_new$Year,d33_new$d_us...37.,type = 'o',ylim = c(90,110),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d33_new$Year,d33_new$d_c...35.,type = 'o',ylim = c(90,110),xlab= "Years",ylab = "Percentage",col="green")
+
+```
+
+```{r}
+#School enrollment, primary and secondary ,gender parity index can't interpret because there is no value for US
+
+#Standerdised precipitation -Evapotranspiration index(0=weak to 12=strong)
+d34<-data.frame(d_uk[,40],d_us[,38],d_c[,37])
+d34
+d34_new<-data.frame(Year,d34)
+head(d34_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d34)
+
+#Drawing Line charts
+#For Standerdised precipitation -Evapotranspiration index(0=weak to 12=strong)
+plot(d34_new$Year,d34_new$d_uk...40.,main="Standerdised precipitation -Evapotranspiration index(0=weak to 12=strong)" ,type = 'o',ylim = c(0,4),xlab = "Years",ylab = "Percentage",col="red")
+lines(d34_new$Year,d34_new$d_us...38.,type = 'o',ylim = c(0,4),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d34_new$Year,d34_new$d_c...37.,type = 'o',ylim = c(0,4),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```{r}
+#Unemployment,total(% of total labor force)
+d35<-data.frame(d_uk[,41],d_us[,39],d_c[,38])
+d35
+d35_new<-data.frame(Year,d35)
+head(d35_new)
+
+#Descriptive analysis
+#Summary of the data frame 
+summary(d35)
+
+#Drawing Line charts
+#For Unemployment,total(% of total labor force)
+plot(d35_new$Year,d35_new$d_uk...41.,main="Unemployment,total(% of total labor force)" ,type = 'o',ylim = c(0,13),xlab = "Years",ylab = "Percentage",col="red")
+lines(d35_new$Year,d35_new$d_us...39.,type = 'o',ylim = c(0,13),xlab= "Years",ylab = "Percentage",col="blue")
+lines(d35_new$Year,d35_new$d_c...38.,type = 'o',ylim = c(0,13),xlab= "Years",ylab = "Percentage",col="green")
+
+
+```
+
+```
+
